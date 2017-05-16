@@ -157,44 +157,6 @@ def createStory():
 
 
 
-
-
-@app.route("/myStory", methods=['POST'])
-def myStory():
-    story = request.form['story']
-    count = int(request.form['count'])
-    sentences = convertToStory.convertToStoryToArray(story)
-    urls = request.form['urls']
-    mp4s = request.form['mp4s']
-    mode = int(request.form['mode'])
-
-
-
-    if urls != "":
-        urls = literal_eval(urls)
-
-    if mp4s != "":
-        mp4s = literal_eval(mp4s)
-
-    if (count == 0):
-        urls = []
-        mp4s = []
-
-    if (count >= len(sentences)):
-        count = -1
-        sentence = "The End"
-        content = logo_gif_url
-    elif (count < len(sentences)):
-        sentence = sentences[count]
-        url, mp4 = sentenceToText.getGifFromPhrase(str(sentence))
-        content = url
-        urls.append(url)
-        mp4s.append(mp4)
-
-    #parse story and construct pages. Each sentence is a page.
-    return render_template('myStory.html', story = story, sentence = sentence,
-    count = count, content = content, urls = urls, mp4s = mp4s)
-
 @app.route("/saveStory", methods=["GET", "POST"])
 def saveStory():
     if (request.method == "GET"):
