@@ -1,0 +1,259 @@
+from flask import Flask, render_template, request, jsonify, make_response
+
+app = Flask(__name__)
+
+#TODO: copy paste own gif url and be selected
+#TODO: Convert stories to video format
+#TODO: Allow users to refresh gif choices (also correct array when user clicks back to repick)
+
+from ast import literal_eval
+import HTMLParser
+import json
+import sentenceToText
+import pixabayAPI
+import convertToStory
+logo_gif_url = "https://media.giphy.com/media/VkMV9TldsPd28/giphy.gif"
+
+
+#DATABASE_MONGODB
+from mongoengine import *
+from mongoengine import connect
+from datetime import *
+connect("storyV0", host="mongodb://penguinjeffrey:penguinsfly12@ds137141.mlab.com:37141/heroku_c8gh7l20")
+
+class Story(Document):
+    title = StringField(required=True, max_length=200, default="")
+    sentences = ListField(StringField(), required=True, default=list)
+    gifURLS = ListField(URLField(), required=True, default=list)
+    #downloadURLS are simply gifURLS by replacing .gif with .mp4, so we do not depend on them.
+    downloadURLS = ListField(StringField(), default=list)
+    views = IntField(default=0)
+    created = DateTimeField(default=datetime.now())
+    genre = StringField(required=True, default="FICTION")
+    location = StringField(required=True, default="UNDEFINED")
+    meta = {'allow_inheritance': True}
+
+@app.route("/")
+def hello():
+    stories = []
+    for story in Story.objects:
+        stories.append(story)
+        print stories
+    return render_template('home.html', stories = stories)
+
+@app.route("/story/<id>/<page>")
+def story(id, page):
+    seeLinks = request.args.get("seeLinks") or 0
+    storyArray = Story.objects(id=id)
+    story = storyArray[0]
+    page = int(page)
+    views = story.views
+    length = len(story.sentences)
+
+
+    if (page >= len(story.sentences)):
+        content = logo_gif_url
+        sentence = "The End."
+        page = -1
+        downloadLinks = story.downloadURLS
+        if (int(seeLinks) != 1):
+            story.views = story.views + 1
+            story.save()
+    else:
+        content = story.gifURLS[page]
+        sentence = story.sentences[page]
+        downloadLinks = []
+
+    shareData = {
+        "link" : "https://text-to-gif.herokuapp.com/story/" + id + "/" + "0",
+        "gif" : story.gifURLS[0],
+        "sentence" : story.sentences[0]
+    }
+
+    return render_template("viewStory.html", story = story, content = content, sentence = sentence,
+    count = page, views = views, length = length, downloadLinks = downloadLinks, seeLinks = int(seeLinks),
+    shareData = shareData)
+
+@app.route("/createGIFStory/<int:page>", methods=["POST"])
+def createGIFStory(page):
+    story = request.form['story']
+    sentences = convertToStory.convertToStoryToArray(story)
+
+    if (page >= len(sentences)):
+        page = -1
+    else:
+        sentence = sentences[page]
+        #get rid of left and right hanging quotes for utf-8
+        sentenceParts, gifURLS, gifMP4S =  sentenceToText.getGifsFromSentence(sentence.raw.replace(u"\u2018", "'").replace(u"\u2019", "'"), 3)
+
+    if (page == -1):
+        sentence = "End Story."
+        gifURLS = [logo_gif_url]
+        gifMP4S = []
+
+    resp = make_response(render_template('createGIFStory.html', story = story, contents = gifURLS,
+        downloadLinks = gifMP4S, sentence = sentence, count = page))
+    if (page == 0):
+        #no saved gifs yet
+        resp.set_cookie('savedGIFS', "[]")
+        resp.set_cookie("savedMP4S", "[]")
+    else:
+        savedGIFS = literal_eval(request.cookies.get('savedGIFS'))
+        savedMP4S = literal_eval(request.cookies.get('savedMP4S'))
+        selectedGIF = request.form['selectedGIF']
+        selectedMP4 = request.form['selectedMP4']
+        savedGIFS.append(selectedGIF)
+        savedMP4S.append(selectedMP4)
+        resp.set_cookie('savedGIFS', jsonify(savedGIFS).get_data())
+        resp.set_cookie('savedMP4S', jsonify(savedMP4S).get_data())
+
+    return resp
+
+
+
+
+@app.route("/createStory", methods=["POST"])
+def createStory():
+    parser = HTMLParser.HTMLParser()
+    story = request.form['story']
+    count = int(request.form['count'])
+    sentences = convertToStory.convertToStoryToArray(story)
+    selected = parser.unescape(request.form['selected'])
+    selection = parser.unescape(request.form['selection'])
+
+    print "Selection: ", selection
+
+    if selected == "" or selected == None:
+        selected = []
+    else:
+        selected = literal_eval(selected) #required otherwise thinks array is string
+
+    if selection == "" or selection == None :
+        error = "Please select an image :( "
+    else:
+        selected.append(selection)
+
+    if (count == 0):
+        selected = []
+
+    if (count >= len(sentences)):
+        count = -1
+        sentence = "Congrats your done! Look below for directions."
+        contents = []
+        parsedData = ""
+    elif (count < len(sentences)):
+        sentence = sentences[count]
+        phrases = sentenceToText.getRandomNumberFromArray(sentenceToText.getPartsFromSentence(str(sentence)), 3)
+        contents = []
+        for phrase in phrases:
+            content = convertToStory.getContentFromPhrase(phrase)
+            contents.append(content.serialize())
+        data = jsonify(contents)
+        parsedData = data.get_data()
+
+
+    return render_template('createStory.html', story = story, sentence = sentence,
+    count = count, contents = contents, selected = selected, data = parsedData)
+
+
+
+
+
+@app.route("/myStory", methods=['POST'])
+def myStory():
+    story = request.form['story']
+    count = int(request.form['count'])
+    sentences = convertToStory.convertToStoryToArray(story)
+    urls = request.form['urls']
+    mp4s = request.form['mp4s']
+    mode = int(request.form['mode'])
+
+
+
+    if urls != "":
+        urls = literal_eval(urls)
+
+    if mp4s != "":
+        mp4s = literal_eval(mp4s)
+
+    if (count == 0):
+        urls = []
+        mp4s = []
+
+    if (count >= len(sentences)):
+        count = -1
+        sentence = "The End"
+        content = logo_gif_url
+    elif (count < len(sentences)):
+        sentence = sentences[count]
+        url, mp4 = sentenceToText.getGifFromPhrase(str(sentence))
+        content = url
+        urls.append(url)
+        mp4s.append(mp4)
+
+    #parse story and construct pages. Each sentence is a page.
+    return render_template('myStory.html', story = story, sentence = sentence,
+    count = count, content = content, urls = urls, mp4s = mp4s)
+
+@app.route("/saveStory", methods=["GET", "POST"])
+def saveStory():
+    if (request.method == "GET"):
+        story = request.args.get("story")
+        savedGIFS = literal_eval(request.cookies.get('savedGIFS'))
+        savedMP4s = literal_eval(request.cookies.get('savedMP4S'))
+        sentences = convertToStory.convertToStoryToArray(story)
+        return render_template("saveStory.html", story = story, sentences = sentences, contents = savedGIFS,
+            downloadLinks = savedMP4s)
+
+
+    print "saving story"
+    genre = request.form['genre']
+    location = request.form['location']
+    story = request.form['story']
+    urls = literal_eval(request.form['urls'])
+    mp4s = literal_eval(request.form['mp4s'])
+    print "MP4S: ", mp4s
+    sentences = convertToStory.convertToStoryToArray(story)
+
+    stringArray = []
+    for sentence in sentences:
+        stringArray.append(sentence.raw)
+
+    story = Story(  title=stringArray[0],
+                    sentences=stringArray,
+                    gifURLS=urls,
+                    downloadURLS=mp4s,
+                    location=location,
+                    genre = genre )
+    story.save()
+    return render_template('savedStory.html')
+
+@app.route("/gifs")
+def gifs():
+    q = request.args.get('q') or ''
+    randomList, giphyURLS, giphyMP4 = sentenceToText.getGifsFromSentence(q)
+    return render_template('gifs.html', results = giphyURLS, q = q, phrases = randomList,
+    links = giphyMP4)
+
+@app.route("/pics")
+def pics():
+    q = request.args.get('q') or ''
+    phrases, pictureURLS, webLinks  = pixabayAPI.getPicturesFromSentence(q)
+    return render_template('pics.html', results = pictureURLS, q = q, phrases = phrases ,
+    links = webLinks)
+
+@app.route("/videos")
+def videos():
+    q = request.args.get('q') or ''
+    phrases, videoURLS, downloadLinks  = pixabayAPI.getVideosFromSentence(q)
+    return render_template('videos.html', results = videoURLS, q = q, phrases = phrases ,
+    links = downloadLinks)
+
+@app.route("/test")
+def test():
+    return "Hello test"
+
+
+
+if __name__ == "__main__":
+    app.run()

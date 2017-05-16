@@ -1,0 +1,18 @@
+
+<h4>Sentence</h4>
+{{ q }}
+<h4>Structure</h4>
+{{ phrases }}
+
+<h4>Videos</h4>
+{%- for result in results %}
+<video width=640 height=360 autoplay controls muted>
+  <source src="{{ result }}" >
+</video>
+{%- endfor %}
+
+<br />
+<h4>Download Links </h4>
+{%- for link in links %}
+  <a href="{{ link }}" download>{{ link }}</a> <br />
+{%- endfor %}

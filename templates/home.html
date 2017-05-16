@@ -1,0 +1,35 @@
+<h2>Describe something that happened today:</h2>
+<p>Type in a few sentences</p>
+
+
+<form id="storyPost" method="post" action="{{ url_for('createGIFStory', page = 0) }}">
+  <textarea name='story' id="story" rows="25" cols="100">
+  </textarea>
+  <br />
+  <input type="submit" value="create story">
+</form>
+
+<!-- <form id="storyPost" method="post" action="{{ url_for('myStory') }}">
+  <textarea name='story' id="story" rows="25" cols="100">
+  </textarea>
+  <input type="hidden" name="count" value='0' />
+  <input type="hidden" id="urls" name="urls" value="" />
+  <input type="hidden" id="mp4s" name="mp4s" value="" />
+  <input type="hidden" id="mode" name="mode" value=0 />
+
+
+  <br />
+  <input type="submit" value="auto-generate">
+</form>
+
+<br />
+<br /> -->
+<br />
+<br />
+<h2>Stories created by other people at UCLA:</h2>
+
+{% if stories is defined %}
+  {% for story in stories %}
+    <a href="{{url_for('.story', id = story.id, page = 0)}}">{{story.title}} ({{story.genre.lower()}})</a> <br />
+  {% endfor %}
+{% endif %}

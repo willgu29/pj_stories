@@ -1,0 +1,15 @@
+
+<h4>Sentence</h4>
+{{ q }}
+<h4>Structure</h4>
+{{ phrases }}
+<h4>Pics</h4>
+{%- for result in results %}
+  <img src="{{ result }}" >
+{%- endfor %}
+
+<br />
+<h4>Download Links </h4>
+{%- for link in links %}
+  <a href="{{ link }}" download>{{ link }}</a> <br />
+{%- endfor %}

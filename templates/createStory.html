@@ -1,0 +1,77 @@
+<h4><a href="/">My Story</a></h4>
+
+<h6>Page {{ count }}</h6>
+<br />
+{{ sentence }}
+<br />
+<br />
+{% if count != -1 %}
+  <p>Choose one of the pictures/videos below to add to your story.</p>
+{% endif %}
+
+{%- for content in contents %}
+    {% if content.formatType == 1 %}
+      <video width=640 onclick="selectionMade({{ loop.index }})" autoplay loop muted>
+        <source src="{{ content.displayURL }}" >
+      </video>
+    {% else %}
+      <img width=640 onclick="selectionMade({{ loop.index }})" src="{{ content.displayURL }}" />
+    {% endif %}
+{%- endfor %}
+
+{% if count != -1 %}
+  <img width=640  onlick="uploadContent()" src="https://it.ubc.ca/sites/it.ubc.ca/files/PS-Upload.png" />
+{% endif %}
+
+<br />
+<br />
+<br />
+
+<form id="storyPost" method="post" action="{{ url_for('createStory') }}">
+  {% set count = count + 1 %}
+  <input type="hidden" name="count" value='{{ count }}' />
+  <input type="hidden" name="story" value="{{ story }}" />
+  <input type="hidden" id="selection" name="selection"  />
+  <input type="hidden" id="selected" name="selected" value="{{selected}}" />
+  {% if count == 0 %}
+  <input type="submit" value="START OVER (if you want THIS video made, email me :) )">
+  {% else %}
+  <input type="submit" value="next page (might take a few seconds)">
+  {% endif %}
+
+</form>
+
+<br />
+<br />
+{{ story }}
+
+
+<meta id="my-data" data-id="{{ data }}" >
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" >
+</script>
+
+<!-- <script>
+window.onload = function run() {
+  document.getElementById("selected").value = "{{ selected }}"
+
+};
+</script> -->
+
+<script type="text/javascript">
+
+  function selectionMade(contentNumber) {
+    alert("Got it! On to the next page!");
+    var contents = document.getElementById("my-data").getAttribute("data-id");
+    if (contents == "") {
+      return;
+    }
+    var parse = JSON.parse(contents);
+    var content = {};
+    for (var i = 0; i < parse.length; i++) {
+      content = parse[i];
+    }
+    console.log(content)
+    document.getElementById('selection').value = JSON.stringify(content);
+  };
+</script>

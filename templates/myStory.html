@@ -1,0 +1,73 @@
+<h4><a href="/">My Story</a></h4>
+
+<h6>Page {{ count }}</h6>
+<br />
+
+<img src="{{ content }}" />
+
+ <br />
+{{ sentence }}
+
+
+<br />
+<br />
+
+{% if count == -1 %}
+
+<h2>Share this story:</h2>
+<br />
+<form id="shareStory" method="post" action="{{ url_for('saveStory')}}">
+  <br />
+  Location:<select name="location">
+    <option value="UCLA">UCLA</option>
+    <option value="GLOBAL">Global</option>
+  </select> <br />
+  Genre:    <select name="genre">
+    <option value="FICTION">Fiction</option>
+    <option value="NONFICTION">Nonfiction</option>
+  </select> <br /> <br />
+  <input type="hidden" name="story" value="{{ story }}" />
+  <input type="hidden" id="urls" name="urls" value="{{ urls }}" />
+  <input type="hidden" id="mp4s" name="mp4s" value="{{ mp4s }}" />
+  <input name type="submit" value="Share Story" />
+</form>
+<br />
+<br />
+<p>**************************</p>
+<br />
+{% endif %}
+
+
+<form id="storyPost" method="post" action="{{ url_for('myStory') }}">
+  {% set count = count + 1 %}
+  <input type="hidden" name="count" value='{{ count }}' />
+  <input type="hidden" name="story" value="{{ story }}" />
+  <input type="hidden" id="urls" name="urls" value="{{ urls }}" />
+  <input type="hidden" id="mp4s" name="mp4s" value="{{ mp4s }}" />
+  <input type="hidden" id="mode" name="mode" value=0 />
+
+
+  {% if count == 0 %}
+  <input type="submit" value="Or start over...">
+  {% else %}
+  <input type="submit" value="next page">
+  {% endif %}
+
+</form>
+
+
+<br />
+<br />
+{{ story }}
+
+<script>
+  function startOver(){
+    alert("Starting over, roger. Just click done now!")
+    document.getElementById("mode").value = 0
+  };
+  function saveStory(){
+    alert("Story will be saved on home page. Just click done now!")
+    document.getElementById("mode").value = 1
+  };
+
+</script>

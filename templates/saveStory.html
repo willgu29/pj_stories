@@ -1,0 +1,33 @@
+<h2>Your newly created story:</h2>
+
+{%- for content in contents %}
+<div style="float: left; padding-right: 10px;">
+  <img  class="gifDisplay" style="border-color : purple;" height=300 src="{{ content }}" />
+  <p style="text-align: center;">{{sentences[loop.index-1]}}</p>
+</div>
+
+{%- endfor %}
+
+<br />
+
+
+<div style="float: none; clear:both; ">
+
+<h4 >Add some finishing details</h4>
+<form id="shareStory" method="post" action="{{ url_for('saveStory')}}">
+  Location:<select name="location">
+    <option value="UCLA">UCLA</option>
+    <option value="GLOBAL">Global</option>
+  </select> <br />
+  Genre:    <select name="genre">
+    <option value="FICTION">Fiction</option>
+    <option value="NONFICTION">Nonfiction</option>
+  </select> <br /> <br />
+  <input type="hidden" name="story" value="{{ story }}" />
+  <input type="hidden" id="urls" name="urls" value="{{ contents }}" />
+  <input type="hidden" id="mp4s" name="mp4s" value="{{ downloadLinks }}" />
+  <input name type="submit" value="Save Story" />
+</form>
+
+
+</div>
