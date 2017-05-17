@@ -25,8 +25,8 @@ class Story(Document):
     title = StringField(required=True, max_length=200, default="")
     sentences = ListField(StringField(), required=True, default=list)
     gifURLS = ListField(URLField(), required=True, default=list)
-    #downloadURLS are simply gifURLS by replacing .gif with .mp4, so we do not depend on them.
-    downloadURLS = ListField(StringField(), default=list)
+    #downloadURLS are simply gifURLS by replacing .gif with .mp4, so we don't save them
+    isPublic = BooleanField(default=False)
     views = IntField(default=0)
     created = DateTimeField(default=datetime.now())
     genre = StringField(required=True, default="FICTION")
@@ -37,13 +37,12 @@ class Story(Document):
 def hello():
     stories = []
     for story in Story.objects:
-        stories.append(story)
-        print stories
+        if story.isPublic:
+            stories.append(story)
     return render_template('home.html', stories = stories)
 
 @app.route("/story/<id>/<page>")
 def story(id, page):
-    seeLinks = request.args.get("seeLinks") or 0
     storyArray = Story.objects(id=id)
     story = storyArray[0]
     page = int(page)
@@ -55,14 +54,11 @@ def story(id, page):
         content = logo_gif_url
         sentence = "The End."
         page = -1
-        downloadLinks = story.downloadURLS
-        if (int(seeLinks) != 1):
-            story.views = story.views + 1
-            story.save()
+        story.views = story.views + 1
+        story.save()
     else:
         content = story.gifURLS[page]
         sentence = story.sentences[page]
-        downloadLinks = []
 
     shareData = {
         "link" : "https://text-to-gif.herokuapp.com/story/" + id + "/" + "0",
@@ -71,8 +67,7 @@ def story(id, page):
     }
 
     return render_template("viewStory.html", story = story, content = content, sentence = sentence,
-    count = page, views = views, length = length, downloadLinks = downloadLinks, seeLinks = int(seeLinks),
-    shareData = shareData)
+    count = page, views = views, length = length, shareData = shareData)
 
 @app.route("/createGIFStory/<int:page>", methods=["POST"])
 def createGIFStory(page):
@@ -89,27 +84,31 @@ def createGIFStory(page):
     if (page == -1):
         sentence = "End Story."
         gifURLS = [logo_gif_url]
-        gifMP4S = []
 
     resp = make_response(render_template('createGIFStory.html', story = story, contents = gifURLS,
-        downloadLinks = gifMP4S, sentence = sentence, count = page))
+        sentence = sentence, count = page))
     if (page == 0):
         #no saved gifs yet
         resp.set_cookie('savedGIFS', "[]")
         resp.set_cookie("savedMP4S", "[]")
     else:
         savedGIFS = literal_eval(request.cookies.get('savedGIFS'))
-        savedMP4S = literal_eval(request.cookies.get('savedMP4S'))
         selectedGIF = request.form['selectedGIF']
-        selectedMP4 = request.form['selectedMP4']
         savedGIFS.append(selectedGIF)
-        savedMP4S.append(selectedMP4)
         resp.set_cookie('savedGIFS', jsonify(savedGIFS).get_data())
-        resp.set_cookie('savedMP4S', jsonify(savedMP4S).get_data())
 
     return resp
 
-
+@app.route('/downloadStory/<id>', methods=["GET"])
+def downloadStory(id):
+    storyArray = Story.objects(id=id)
+    story = storyArray[0]
+    gifURLS = story.gifURLS;
+    downloadLinks = []
+    for url in gifURLS:
+        downloadLink = url.replace('.gif', '.mp4', 1)
+        downloadLinks.append(downloadLink)
+    return render_template('downloadStory.html', downloadLinks = downloadLinks, id = id)
 
 
 @app.route("/createStory", methods=["POST"])
@@ -162,10 +161,8 @@ def saveStory():
     if (request.method == "GET"):
         story = request.args.get("story")
         savedGIFS = literal_eval(request.cookies.get('savedGIFS'))
-        savedMP4s = literal_eval(request.cookies.get('savedMP4S'))
         sentences = convertToStory.convertToStoryToArray(story)
-        return render_template("saveStory.html", story = story, sentences = sentences, contents = savedGIFS,
-            downloadLinks = savedMP4s)
+        return render_template("saveStory.html", story = story, sentences = sentences, contents = savedGIFS)
 
 
     print "saving story"
@@ -184,7 +181,6 @@ def saveStory():
     story = Story(  title=stringArray[0],
                     sentences=stringArray,
                     gifURLS=urls,
-                    downloadURLS=mp4s,
                     location=location,
                     genre = genre )
     story.save()
