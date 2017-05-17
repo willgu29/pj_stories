@@ -1,1 +1,10 @@
+{% if isPublic %}
+
 <h4>Your story is saved on the <a href="/">home page!</a></h4>
+<p><a href="{{url_for('.story', id = storyID, page = 0)}}">Direct Link</a> (share it on Facebook)</p>
+
+{% else %}
+
+<h4>Here's a link to your story (only share it with people you want to see your story)</h4>
+<p><a href="{{url_for('.story', id = storyID, page = 0)}}">Direct Link</a></p>
+{% endif %}

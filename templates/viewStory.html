@@ -47,6 +47,13 @@
 
 </form>
 
+{% if count == 0 %}
+<div class="fb-share-button"
+   data-href="{{shareData.link}}"
+   data-layout="button">
+</div>
+{% endif %}
+
 {% if count == -1 %}
 <h4> This story has been viewed {{views + 1}} times</h4>
 <div class="fb-share-button"

@@ -90,7 +90,6 @@ def createGIFStory(page):
     if (page == 0):
         #no saved gifs yet
         resp.set_cookie('savedGIFS', "[]")
-        resp.set_cookie("savedMP4S", "[]")
     else:
         savedGIFS = literal_eval(request.cookies.get('savedGIFS'))
         selectedGIF = request.form['selectedGIF']
@@ -169,9 +168,8 @@ def saveStory():
     genre = request.form['genre']
     location = request.form['location']
     story = request.form['story']
+    isPublic = int(request.form["isPublic"])
     urls = literal_eval(request.form['urls'])
-    mp4s = literal_eval(request.form['mp4s'])
-    print "MP4S: ", mp4s
     sentences = convertToStory.convertToStoryToArray(story)
 
     stringArray = []
@@ -182,9 +180,10 @@ def saveStory():
                     sentences=stringArray,
                     gifURLS=urls,
                     location=location,
+                    isPublic=isPublic,
                     genre = genre )
     story.save()
-    return render_template('savedStory.html')
+    return render_template('savedStory.html', isPublic = isPublic, storyID = story.id)
 
 @app.route("/gifs")
 def gifs():

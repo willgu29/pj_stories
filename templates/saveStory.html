@@ -22,10 +22,13 @@
   Genre:    <select name="genre">
     <option value="FICTION">Fiction</option>
     <option value="NONFICTION">Nonfiction</option>
+  </select> <br />
+  Make Public: <select name="isPublic">
+    <option value='1'>Yes</option>
+    <option value='0'>No</option>
   </select> <br /> <br />
   <input type="hidden" name="story" value="{{ story }}" />
   <input type="hidden" id="urls" name="urls" value="{{ contents }}" />
-  <input type="hidden" id="mp4s" name="mp4s" value="{{ downloadLinks }}" />
   <input name type="submit" value="Save Story" />
 </form>
 

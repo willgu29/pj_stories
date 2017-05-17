@@ -7,11 +7,23 @@
 <br />
 {%- for content in contents %}
   <img class="gifDisplay" style="border-color : purple;" width=340
-    onclick="return selectionMade('{{ content }}', this, '{{downloadLinks[loop.index-1]}}')"
+    onclick="return selectionMade(this)"
     src="{{ content }}" />
 {%- endfor %}
-<p>Or insert the url of a gif</p>
+
+
+{% if count != -1 %}
+<img class="gifDisplay" id="userGIF" style="border-color : purple; display: none;" width=340
+  onclick="return selectionMade(this)"
+  alt="Could not load, make sure url ends in .gif"
+  src="" />
+
+<p>Or insert the url of a gif: </p>
+<input type="text" width="400" id="userGIFURL" name="userGIFURL" >
+<input onclick="displayUserGif()" type="submit" value="load gif">
+
 <br />
+{% endif %}
 
 
 <br />
@@ -19,19 +31,24 @@
 {% if count == -1 %}
 
 <h2>Share this story:</h2>
+<!--
 <p>We'll give you a link to share to Facebook. Your story won't be shared on this site without your permission.</p>
+-->
 <form id="shareStory" method="get" action="{{ url_for('saveStory')}}">
   <input type="hidden" name="story" value="{{ story }}" />
-  <input name type="submit" value="share story" />
+  <input type="submit" value="preview it" />
 </form>
 <br />
 <br />
 <h2>Re-make it:</h2>
 {% endif %}
-<form id="storyPost" method="post" action="{{ url_for('createGIFStory', page = count + 1) }}">
+<form id="storyPost"
+        method="post"
+        action="{{ url_for('createGIFStory', page = count + 1) }}"
+        onsubmit="return validateForm()">
+
   <input type="hidden" name="story" value="{{ story }}" />
-  <input type="hidden" id="selectedGIF" name="selectedGIF"  />
-  <input type="hidden" id="selectedMP4" name="selectedMP4"  />
+  <input type="hidden" id="selectedGIF" name="selectedGIF" value="" />
 
 
   {% if count == -1 %}
@@ -52,8 +69,24 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" >
 </script>
 
+
+
 <script type="text/javascript">
-  function selectionMade(url, selected, downloadLink) {
+  function validateForm() {
+    var selectedGIF = document.forms["storyPost"]["selectedGIF"].value;
+    if (selectedGIF == "") {
+      alert("Please selected a GIF :D");
+      return false;
+    }
+  };
+
+  function displayUserGif() {
+    var gifURL = document.getElementById("userGIFURL").value;
+    document.getElementById("userGIF").src = gifURL;
+    document.getElementById("userGIF").style = "border-color : purple; display: block;"
+  };
+
+  function selectionMade(selected) {
 
     //De-select all gifs
     var gifs = document.querySelectorAll(".gifDisplay");
@@ -63,8 +96,7 @@
     }
 
     //Select gif clicked
-    document.getElementById("selectedGIF").value = url
-    document.getElementById("selectedMP4").value = downloadLink
+    document.getElementById("selectedGIF").value = selected.src
     selected.border = 3
   };
 </script>
