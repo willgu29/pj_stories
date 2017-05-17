@@ -5,6 +5,7 @@ app = Flask(__name__)
 #TODO: Convert stories to video format
 #TODO: Allow users to refresh gif choices (also correct array when user clicks back to repick)
 #TODO: User profiles for saved non-public stories and option to make public
+#TODO: Mobile optimize
 
 from ast import literal_eval
 import HTMLParser
@@ -25,6 +26,7 @@ class Story(Document):
     title = StringField(required=True, max_length=200, default="")
     sentences = ListField(StringField(), required=True, default=list)
     gifURLS = ListField(URLField(), required=True, default=list)
+    videoURL = StringField(default="")
     #downloadURLS are simply gifURLS by replacing .gif with .mp4, so we don't save them
     isPublic = BooleanField(default=False)
     views = IntField(default=0)
@@ -48,8 +50,7 @@ def story(id, page):
     page = int(page)
     views = story.views
     length = len(story.sentences)
-
-
+    print story.videoURL
     if (page >= len(story.sentences)):
         content = logo_gif_url
         sentence = "The End."
@@ -68,6 +69,16 @@ def story(id, page):
 
     return render_template("viewStory.html", story = story, content = content, sentence = sentence,
     count = page, views = views, length = length, shareData = shareData)
+
+@app.route("/story/<id>")
+def videoStory(id):
+    storyArray = Story.objects(id=id)
+    story = storyArray[0]
+    videoURL = story.videoURL
+    shareLink = "https://text-to-gif.herokuapp.com/story/" + id + "/" + "0"
+    return render_template("viewVideoStory.html", story = story, videoURL = videoURL, shareLink = shareLink)
+
+
 
 @app.route("/createGIFStory/<int:page>", methods=["POST"])
 def createGIFStory(page):
@@ -98,6 +109,8 @@ def createGIFStory(page):
 
     return resp
 
+
+#TODO: Replace /giphy-downsized-large.mp4 with giphy.mp4 reference [catchy title] for download fail case
 @app.route('/downloadStory/<id>', methods=["GET"])
 def downloadStory(id):
     storyArray = Story.objects(id=id)

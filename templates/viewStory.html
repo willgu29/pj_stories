@@ -29,7 +29,7 @@
 
 <!-- page -->
 
-<h4><a href="/">Story</a></h4>
+<h2><a href="/">Story</a></h2>
 
 <h4 style="text-align:center;" id="page">Page {{ count + 1 }} / {{ length }}</h4>
 <br />
@@ -47,11 +47,16 @@
 
 </form>
 
+
+
 {% if count == 0 %}
-<div class="fb-share-button"
-   data-href="{{shareData.link}}"
-   data-layout="button">
-</div>
+  {% if story.videoURL != "" %}
+  <a href="{{url_for('.videoStory', id = story.id)}}">View Video</a> <br />
+  {% endif %}
+  <div class="fb-share-button"
+    data-href="{{shareData.link}}"
+    data-layout="button">
+  </div>
 {% endif %}
 
 {% if count == -1 %}
