@@ -6,6 +6,8 @@ app = Flask(__name__)
 #TODO: Allow users to refresh gif choices (also correct array when user clicks back to repick)
 #TODO: User profiles for saved non-public stories and option to make public
 #TODO: Mobile optimize
+#TODO: Next or previous button for next video or story when done
+#TODO: Analytics
 
 from ast import literal_eval
 import HTMLParser
@@ -201,7 +203,7 @@ def saveStory():
 @app.route("/gifs")
 def gifs():
     q = request.args.get('q') or ''
-    randomList, giphyURLS, giphyMP4 = sentenceToText.getGifsFromSentence(q)
+    randomList, giphyURLS, giphyMP4 = sentenceToText.getGifsFromSentence(q, 4)
     return render_template('gifs.html', results = giphyURLS, q = q, phrases = randomList,
     links = giphyMP4)
 
