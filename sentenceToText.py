@@ -8,7 +8,7 @@ fill_phrases = ["You got it.", "Freedom", "Take that!", "I am god.", "That's eno
 #give more variety to emotional responses
 positive_res = ["Nice", "Woo!", "Hell yeah"]
 negative_res = ["Damn", "We're fucked", "Not like this"]
-neutral_res = ["Huh", "I don't get it", "What do you mean?"]
+neutral_res = ["Huh", "I don't get it", "Okay"]
 
 #break sentence into parts of speech and return relevant words and phrases
 def getPartsFromSentence(sentence):
