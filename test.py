@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify, make_response
 
 app = Flask(__name__)
 
-#TODO: Convert stories to video format
+
+#TODO: Convert stories to video format *** priority 1
 #TODO: Allow users to refresh gif choices (also correct array when user clicks back to repick)
 #TODO: User profiles for saved non-public stories and option to make public
 #TODO: Mobile optimize
