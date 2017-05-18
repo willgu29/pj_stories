@@ -53,6 +53,9 @@
   {% if story.videoURL != "" %}
   <a href="{{url_for('.videoStory', id = story.id)}}">View Video</a> <br />
   {% endif %}
+  {% if story.articleURL != "" %}
+  <a href="{{story.articleURL}}" target="_blank" >View Article</a> <br />
+  {% endif %}
   <div class="fb-share-button"
     data-href="{{shareData.link}}"
     data-layout="button">

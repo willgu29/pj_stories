@@ -20,6 +20,7 @@ import json
 import sentenceToText
 import pixabayAPI
 import convertToStory
+import StringConversion
 logo_gif_url = "https://media.giphy.com/media/VkMV9TldsPd28/giphy.gif"
 
 
@@ -33,7 +34,9 @@ class Story(Document):
     title = StringField(required=True, max_length=200, default="")
     sentences = ListField(StringField(), required=True, default=list)
     gifURLS = ListField(URLField(), required=True, default=list)
+    #optional urls for additional ways to consume the information
     videoURL = StringField(default="")
+    articleURL = StringField(default="")
     #downloadURLS are simply gifURLS by replacing .gif with .mp4, so we don't save them
     isPublic = BooleanField(default=False)
     views = IntField(default=0)
@@ -97,7 +100,7 @@ def createGIFStory(page):
     else:
         sentence = sentences[page]
         #get rid of left and right hanging quotes for utf-8
-        sentenceParts, gifURLS, gifMP4S =  sentenceToText.getGifsFromSentence(sentence.raw.replace(u"\u2018", "'").replace(u"\u2019", "'"), 3)
+        sentenceParts, gifURLS, gifMP4S =  sentenceToText.getGifsFromSentence(sentence.raw, 3)
 
     if (page == -1):
         sentence = "End Story."
@@ -194,7 +197,9 @@ def saveStory():
 
     stringArray = []
     for sentence in sentences:
-        stringArray.append(sentence.raw.replace(u"\u2018", "'").replace(u"\u2019", "'"))
+        #we're stuck in ascii currently, so we get rid of common english unicode
+        sentence = StringConversion.replaceUnicode(sentence.raw)
+        stringArray.append(sentence)
 
     story = Story(  title=stringArray[0],
                     sentences=stringArray,
@@ -226,10 +231,23 @@ def videos():
     return render_template('videos.html', results = videoURLS, q = q, phrases = phrases ,
     links = downloadLinks)
 
-@app.route("/test")
-def test():
-    return "Hello test"
+#Experimental routes
 
+@app.route("/generateStory", methods=["GET", "POST"])
+def generateStory():
+    if (request.method == "GET"):
+        return render_template("test.html")
+
+    story = request.form['story']
+    sentences = convertToStory.convertToStoryToArray(story)
+    selectedGIFS = []
+
+    for sentence in sentences:
+        sentenceParts, gifURLS, gifMP4S =  sentenceToText.getGifsFromSentence(sentence.raw, 1)
+        gifURL = gifURLS[0]
+        selectedGIFS.append(gifURL)
+
+    return render_template("saveStory.html", story = story, sentences = sentences, contents = selectedGIFS)
 
 
 if __name__ == "__main__":

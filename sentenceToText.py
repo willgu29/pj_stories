@@ -74,7 +74,7 @@ def getGifsFromSentence(sentence, count):
 
     #Get some more gifs if they have less than 3
     exitCase = 0
-    while len(giphyURLS) < 3 or exitCase > 5:
+    while len(giphyURLS) < count or exitCase > 5:
         phrase = random.choice(fill_phrases)
         print "Random phrase: " + phrase
         url, mp4 = getGifFromPhrase(phrase)

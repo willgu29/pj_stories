@@ -30,11 +30,13 @@ def make_content(displayURL, downloadURL, formatType):
     content = Content(displayURL, downloadURL, formatType)
     return content
 
+
+
 def convertToStoryToArray(story):
     blob = TextBlob(story)
     return blob.sentences
 
-    
+#deprecated
 
 def getContentFromPhrase(phrase):
     videoURL, downloadURL = pixabayAPI.getVideoFromPhrase(phrase)
