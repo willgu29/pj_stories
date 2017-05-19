@@ -3,16 +3,17 @@ from flask import Flask, render_template, request, jsonify, make_response
 app = Flask(__name__)
 
 
-#TODO: Convert stories to video format *** priority 1
-#TODO: When saving sentences, get rid of unicode and escaped characters
+#TODO: Convert stories to video format *** priority 1 ****
+#TODO: machinelearning time?
+
+#TODO: AI speak text? Easier "movie" watching experience
 #TODO: Still need to handle all unicode 128 + edge-cases... currently only deals with left and right quote
-#\u201c \u201d <-- are still problems (fancy left right double quote)
 #TODO: downloadLink https vs http and giphy-downsized-large problems
 #TODO: Allow users to refresh gif choices (also correct array when user clicks back to repick)
 #TODO: User profiles for saved non-public stories and option to make public
 #TODO: Mobile optimize
 #TODO: Next or previous button for next video or story when done
-#TODO: Analytics
+#TODO: Giphy blocks download on "originals" that they've made as part of a campaign... they are rare but yah.
 
 from ast import literal_eval
 import HTMLParser
