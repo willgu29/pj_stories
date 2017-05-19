@@ -4,6 +4,7 @@ import json
 import random
 import sentenceToText
 import pixabayAPI
+import StringConversion
 
 
 type_picture = 0
@@ -33,7 +34,8 @@ def make_content(displayURL, downloadURL, formatType):
 
 
 def convertToStoryToArray(story):
-    blob = TextBlob(story)
+    string = StringConversion.replaceUnicode(story)
+    blob = TextBlob(string)
     return blob.sentences
 
 #deprecated
