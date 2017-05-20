@@ -269,7 +269,7 @@ def render(id):
     #Each file must be uniquely named an in alphabetical order
     tracker = Tracker('a', 1)
     errorFiles = []
-    fileRoot = "../Auto/" +  str(story.id) + "/"
+    fileRoot = "../Auto/" +  str(story.id)
     if not os.path.isdir(fileRoot):
         os.mkdir(fileRoot)
 
@@ -278,11 +278,11 @@ def render(id):
         fileName = tracker.letter * tracker.count
         tracker.increment()
         downloadLink = url.replace('-downsized-large', '', 1).replace('.gif', '.mp4', 1)
-        f, headers = urllib.urlretrieve(downloadLink, (fileRoot + fileName + ".mp4"))
-        print headers
+        f, headers = urllib.urlretrieve(downloadLink, (fileRoot + "/" +fileName + ".mp4"))
+        print f
 
     if (errorFiles == []):
-        filePath = fileRoot + str(story.id)+ ".json"
+        filePath = fileRoot + ".json"
     else:
         filePath = "../Staging/" + str(story.id)+ ".json"
     #Write json to Auto folder
