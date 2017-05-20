@@ -18,6 +18,8 @@ app = Flask(__name__)
 from ast import literal_eval
 import HTMLParser
 import json
+import os
+import urllib
 import sentenceToText
 import pixabayAPI
 import convertToStory
@@ -53,6 +55,15 @@ def hello():
         if story.isPublic:
             stories.append(story)
     return render_template('home.html', stories = stories)
+
+@app.route('/watch')
+def watch():
+    stories = []
+    for story in Story.objects:
+        stories.append(story)
+    return render_template('home.html', stories = stories)
+
+
 
 @app.route("/story/<id>/<page>")
 def story(id, page):
@@ -233,6 +244,58 @@ def videos():
     links = downloadLinks)
 
 #Experimental routes
+
+class Tracker(object):
+    def __init__(self, startLetter, startCount):
+        self.letter = startLetter
+        self.count = startCount
+    def increment(self):
+        if (self.count == 26):
+            self.count = 1
+            self.letter = chr(ord(self.letter) + 1)
+        else:
+            self.count += 1
+
+
+
+@app.route("/render/<id>")
+def render(id):
+    storyArray = Story.objects(id=id)
+    if storyArray == []:
+        return render_template('home.html')
+    story = storyArray[0]
+
+
+    #Each file must be uniquely named an in alphabetical order
+    tracker = Tracker('a', 1)
+    errorFiles = []
+    fileRoot = "../Auto/" +  str(story.id) + "/"
+    if not os.path.isdir(fileRoot):
+        os.mkdir(fileRoot)
+
+    #This loop supports up to 650 unique names
+    for idx, url in enumerate(story.gifURLS):
+        fileName = tracker.letter * tracker.count
+        tracker.increment()
+        downloadLink = url.replace('-downsized-large', '', 1).replace('.gif', '.mp4', 1)
+        f, headers = urllib.urlretrieve(downloadLink, (fileRoot + fileName + ".mp4"))
+        print headers
+
+    if (errorFiles == []):
+        filePath = fileRoot + str(story.id)+ ".json"
+    else:
+        filePath = "../Staging/" + str(story.id)+ ".json"
+    #Write json to Auto folder
+    parsed = json.loads(story.to_json())
+    pretty = json.dumps(parsed, indent=4, sort_keys=True)
+
+    f = open(filePath, 'w')
+    f.write(pretty)
+    f.close()
+
+
+
+    return render_template('render.html', filePath = filePath, errors = errorFiles)
 
 @app.route("/generateStory", methods=["GET", "POST"])
 def generateStory():

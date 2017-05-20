@@ -1,0 +1,10 @@
+<h2>Rendering...</h2>
+
+{{filePath}}
+
+
+<h2>Errors </h2>
+
+{% for error in errors %}
+<p>{{error.idx}} | {{error.fileName}} | <a href="{{error.url}}">{{error.url}}</a></p> <br />
+{% endfor %}
