@@ -1,0 +1,18 @@
+
+<h2><a href="{{url_for('home')}}">Penguin Jeffrey:</a></h2>
+<a href="{{url_for('about')}}">About</a> <br />
+<a href="{{url_for('vent')}}">Vent</a> <br />
+
+
+<h2>Vent- you're anonymous:</h2>
+<p>Just try to be semi-coherent :)</p>
+
+
+<form id="storyPost" method="post" action="{{ url_for('createGIFStory', page = 0) }}">
+  <textarea name='story' id="story" rows="25" cols="100"></textarea>
+  <br />
+  <input type="submit" value="create story">
+</form>
+
+<br />
+<br />

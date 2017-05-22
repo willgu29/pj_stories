@@ -13,24 +13,22 @@
 
 <div style="float: none; clear:both; ">
 
-<h4 >Add some finishing details</h4>
+<h2>Add some finishing details</h2>
 <form id="shareStory" method="post" action="{{ url_for('saveStory')}}">
-  Location:<select name="location">
-    <option value="UCLA">UCLA</option>
-    <option value="GLOBAL">Global</option>
-  </select> <br />
-  Genre:    <select name="genre">
-    <option value="FICTION">Fiction</option>
-    <option value="NONFICTION">Nonfiction</option>
-  </select> <br />
+
   Make Public: <select name="isPublic">
     <option value='1'>Yes</option>
     <option value='0'>No</option>
   </select> <br /> <br />
+  Public vents will be converted into a video <a href="{{ url_for('about') }}"
+                                                target=__blank>like this</a>
+  and shared on this site.<br />
   <input type="hidden" name="story" value="{{ story }}" />
-  <input type="hidden" id="urls" name="urls" value="{{ contents }}" />
+  <input type="hidden" id="urls" name="urls" value="{{ contents }}" /> <br />
   <input name type="submit" value="Save Story" />
 </form>
 
 
 </div>
+
+<br />

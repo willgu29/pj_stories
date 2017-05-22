@@ -1,11 +1,11 @@
-<h2><a href="{{url_for('home')}}">Penguin Jeffrey:</a></h2>
-<a href="{{url_for('about')}}">About</a> <br />
-<a href="{{url_for('vent')}}">Vent</a> <br />
-
-
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" >
 </script>
 <script src="{{ url_for('static', filename='jquery.countdown.js') }}"></script>
+
+
+<h2>Featured Vents:</h2>
+
+
 
 <div style="text-align: center; font-size: 40px;" id="getting-started"></div>
 <script type="text/javascript">
@@ -23,7 +23,7 @@
 <iframe style="align : middle; "
         width="600"
         height="600"
-        src=""
+        src="{{ videoURL }}"
         frameborder="0"
         allowfullscreen>
 </iframe>
@@ -31,12 +31,5 @@
 
 
 
-<a href="">Previous Story</a>
-<a style="float:right;" href="">Next Story</a>
-
-
-<script>
-function hideTimer() {
-
-}
-</script>
+<a href="">Previous Vent</a>
+<a style="float:right;" href="">Next Vent</a>

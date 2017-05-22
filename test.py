@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response, send_from_directory
 
 app = Flask(__name__)
 
@@ -48,13 +48,17 @@ class Story(Document):
     location = StringField(required=True, default="UNDEFINED")
     meta = {'allow_inheritance': True}
 
+class Request(Document):
+    storyID = StringField(required=True, default="")
+    contact = StringField(required=True, default="")
+
 @app.route("/")
-def hello():
-    stories = []
-    for story in Story.objects:
-        if story.isPublic:
-            stories.append(story)
-    return render_template('home.html', stories = stories)
+def home():
+    return render_template('home.html', toDate = "2017/05/22")
+
+@app.route('/vent')
+def vent():
+    return render_template('vent.html')
 
 @app.route('/watch')
 def watch():
@@ -63,6 +67,13 @@ def watch():
         stories.append(story)
     return render_template('home.html', stories = stories)
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/featured")
+def featured():
+    return render_template("featured.html", toDate = "2017/05/22", videoURL = "")
 
 
 @app.route("/story/<id>/<page>")
@@ -115,7 +126,7 @@ def createGIFStory(page):
         sentenceParts, gifURLS, gifMP4S =  sentenceToText.getGifsFromSentence(sentence.raw, 3)
 
     if (page == -1):
-        sentence = "End Story."
+        sentence = ""
         gifURLS = [logo_gif_url]
 
     resp = make_response(render_template('createGIFStory.html', story = story, contents = gifURLS,
@@ -200,8 +211,6 @@ def saveStory():
 
 
     print "saving story"
-    genre = request.form['genre']
-    location = request.form['location']
     story = request.form['story']
     isPublic = int(request.form["isPublic"])
     urls = literal_eval(request.form['urls'])
@@ -216,11 +225,18 @@ def saveStory():
     story = Story(  title=stringArray[0],
                     sentences=stringArray,
                     gifURLS=urls,
-                    location=location,
-                    isPublic=isPublic,
-                    genre = genre )
+                    isPublic=isPublic)
     story.save()
     return render_template('savedStory.html', isPublic = isPublic, storyID = story.id)
+
+@app.route("/videoRequest")
+def videoRequest():
+    contact = request.form["contact"]
+    storyID = request.form["storyID"]
+    newRequest = Request(storyID=storyID, contact=contact)
+    newRequest.save()
+    return render_template("saved.html")
+
 
 @app.route("/gifs")
 def gifs():

@@ -1,10 +1,19 @@
 {% if isPublic %}
 
-<h4>Your story is saved on the <a href="/">home page!</a></h4>
-<p><a href="{{url_for('.story', id = storyID, page = 0)}}">Direct Link</a> (share it on Facebook)</p>
+<h4>Your vent is saved here (we'll link a video within a day):</h4>
+<p><a href="{{url_for('.story', id = storyID, page = 0)}}">Direct Link</a></p>
 
 {% else %}
 
-<h4>Here's a link to your story (only share it with people you want to see your story)</h4>
+<h4>Here's a link to your vent: (no one else can see it)</h4>
 <p><a href="{{url_for('.story', id = storyID, page = 0)}}">Direct Link</a></p>
+
+<h4>Or give us a way to let you know your video is made!</h4>
+<form id="videoMade" method="post" action="{{ url_for('videoRequest') }}">
+  <input type="text" name="contact" placeholder="How should we contact you?" />
+  <input type="hidden" name="storyID" value={{storyID}} />
+  <br />
+  <input type="submit" value="we'll never share your information <3">
+</form>
+
 {% endif %}
